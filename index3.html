@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Drive Clone</title>
+  <link rel="stylesheet" href="bootstrap.min.css" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    .file-card {
+      border: 1px solid #dee2e6;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .file-name {
+      margin: 0;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<div id="root" class="container"></div>
+
+<!-- JS Files -->
+<script src="react.development.js"></script>
+<script src="react-dom.development.js"></script>
+<script src="babel.min.js"></script>
+<script src="bootstrap.bundle.min.js"></script>
+
+<script type="text/babel">
+
+function DriveApp() {
+  const [items, setItems] = React.useState([]);
+  const [inputName, setInputName] = React.useState('');
+  const [inputType, setInputType] = React.useState('file');
+  const [editingId, setEditingId] = React.useState(null);
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); //
+    if (!inputName.trim()) return; //
+
+    if (editingId !== null) { //
+      // Update
+      setItems(items.map(item => //
+        item.id === editingId ? { ...item, name: inputName.trim(), type: inputType } : item
+      ));
+    } else {
+      // Add 
+      const newItem = {
+        id: Date.now(),
+        name: inputName.trim(),
+        type: inputType,
+      };
+      setItems([...items, newItem]);
+    }
+
+    setInputName('');
+    setInputType('file');
+    setEditingId(null);
+  };
+
+
+  
+  const handleEdit = (item) => {
+    setInputName(item.name);
+    setInputType(item.type);
+    setEditingId(item.id);
+  };
+
+  const handleDelete = (id) => {
+    setItems(items.filter(item => item.id !== id));
+  };
+
+  return (
+    <div>
+      <h1 className="mb-4">Drive Clone</h1>
+
+      <form onSubmit={handleSubmit} className="mb-4">
+        <div className="mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Enter file or folder name"
+            value={inputName}
+            onChange={(e) => setInputName(e.target.value)}
+          />
+        </div>
+        <div className="mb-3">
+          <select
+            className="form-select"
+            value={inputType}
+            onChange={(e) => setInputType(e.target.value)}
+          >
+            <option value="file">File</option>
+            <option value="folder">Folder</option>
+          </select>
+        </div>
+        <button type="submit" className="btn btn-primary">
+          {editingId ? "Update" : "Add"}
+        </button>
+      </form>
+
+      {items.map(item => (
+        <div key={item.id} className="file-card">
+          <p className="file-name">
+            {item.type === 'folder' ? '📁' : '📄'} {item.name}
+          </p>
+          <div>
+            <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(item)}>Edit</button>
+            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(item.id)}>Delete</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<DriveApp />);
+</script>
+
+</body>
+</html>
